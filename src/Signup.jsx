@@ -4,14 +4,18 @@ import { auth } from "../config/firebaseConfig.js";
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
+import { useNavigate, Link } from "react-router-dom";
 
-function App() {
+function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const navigate = useNavigate();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -32,6 +36,23 @@ function App() {
     } catch (error) {
       setError(error.message);
       console.error("Error creating user:", error.message);
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+    }
+    setLoading(false);
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      console.log("User signed in with Google successfully");
+      navigate("/home");
+    } catch (error) {
+      setError(error.message);
+      console.error("Error signing in with Google:", error.message);
       setTimeout(() => {
         setError(null);
       }, 5000);
@@ -90,8 +111,40 @@ function App() {
           </button>
         </div>
       </form>
+      <div className="flex items-center justify-center w-full max-w-md mt-4">
+        <div className="flex-grow border-t border-gray-300"></div>
+        <p className="mx-4 text-gray-500">or</p>
+        <div className="flex-grow border-t border-gray-300"></div>
+      </div>
+      <div className="mt-4 w-full max-w-md">
+        <button
+          onClick={handleGoogleSignIn}
+          className={`w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={loading}
+        >
+          <img
+            className="h-5 w-5 mr-2"
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google logo"
+          />
+          Sign in with Google
+        </button>
+      </div>
+      <div className="mt-4 text-center">
+        <p className="text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+          >
+            Log in
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
 
-export default App;
+export default Signup;
